@@ -1,0 +1,39 @@
+const mongoose = require('mongoose');
+
+const savedDesignSchema = new mongoose.Schema({
+  designNumber: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  rows: [
+    {
+      baseStitches: { type: String, default: '' },
+      repeat: { type: Number, default: 1 },
+    },
+  ],
+  rate: {
+    type: String,
+    default: '',
+  },
+  pieces: {
+    type: Number,
+    default: 1,
+  },
+  grandTotal: {
+    type: Number,
+    default: 0,
+  },
+  onePieceRate: {
+    type: Number,
+    default: 0,
+  },
+  totalCost: {
+    type: Number,
+    default: 0,
+  },
+}, {
+  timestamps: true,
+});
+
+module.exports = mongoose.model('SavedDesign', savedDesignSchema);
