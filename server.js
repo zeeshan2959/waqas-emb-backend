@@ -22,7 +22,7 @@ const server = http.createServer(app);
 
 // Determine allowed origins
 const getAllowedOrigins = () => {
-  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+  const corsOrigin = process.env.CORS_ORIGIN || 'https://waqas-emb-backend.onrender.com/';
   if (corsOrigin.includes(',')) {
     return corsOrigin.split(',').map(origin => origin.trim());
   }
@@ -98,7 +98,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on https://waqas-emb-backend.onrender.com/`);
   console.log(`WebSocket server running on ws://localhost:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
