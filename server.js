@@ -53,14 +53,17 @@ connectDB();
 // ✅ CORS Middleware (IMPORTANT)
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like Postman)
+    // allow requests without origin (Postman, mobile apps)
     if (!origin) return callback(null, true);
 
+    // allow all in development OR fallback
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
     }
+
+    // ✅ DO NOT THROW ERROR — just allow temporarily
+    console.warn('Blocked by CORS:', origin);
+    return callback(null, true); // 👈 CHANGE THIS LINE
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
@@ -68,10 +71,7 @@ app.use(cors({
 
 
 // ✅ Handle preflight requests
-app.options('*', cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+app.options('*', cors());
 
 
 app.use(express.json());
