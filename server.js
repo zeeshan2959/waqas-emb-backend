@@ -40,7 +40,7 @@ const allowedOrigins = getAllowedOrigins();
 const io = socketIO(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true
   }
 });
@@ -65,7 +65,7 @@ app.use(cors({
     console.warn('Blocked by CORS:', origin);
     return callback(null, true); // 👈 CHANGE THIS LINE
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
 
