@@ -20,37 +20,65 @@ const dashboardRouter = require('./routes/dashboard');
 const app = express();
 const server = http.createServer(app);
 
-// Determine allowed origins
+
+// ✅ Allowed origins (FIXED)
 const getAllowedOrigins = () => {
-  const corsOrigin = process.env.CORS_ORIGIN || 'https://waqas-emb-backend.onrender.com/';
+  const corsOrigin =
+    process.env.CORS_ORIGIN || 'https://waqas-emb-fe.vercel.app';
+
   if (corsOrigin.includes(',')) {
     return corsOrigin.split(',').map(origin => origin.trim());
   }
+
   return [corsOrigin];
 };
 
 const allowedOrigins = getAllowedOrigins();
 
-// Socket.io setup for real-time updates
+
+// ✅ Socket.io setup (FIXED)
 const io = socketIO(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ['GET', 'POST']
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
   }
 });
 
-// Connect to MongoDB
+
+// ✅ Connect to MongoDB
 connectDB();
 
-// Middleware
+
+// ✅ CORS Middleware (IMPORTANT)
 app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like Postman)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
+
+
+// ✅ Handle preflight requests
+app.options('*', cors({
   origin: allowedOrigins,
   credentials: true
 }));
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Socket.io connection handler
+
+// ✅ Socket.io connection handler
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
@@ -58,20 +86,20 @@ io.on('connection', (socket) => {
     console.log('Client disconnected:', socket.id);
   });
 
-  // You can add event listeners for real-time updates
   socket.on('data-update', (data) => {
-    // Broadcast updates to all connected clients
     io.emit('data-update', data);
   });
 });
 
-// Make io accessible to routes
+
+// ✅ Make io accessible in routes
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-// Routes
+
+// ✅ Routes
 app.use('/api/collections', collectionsRouter);
 app.use('/api/parties', partiesRouter);
 app.use('/api/ghausiaLots', ghausiaLotsRouter);
@@ -82,28 +110,34 @@ app.use('/api/rateCalculations', rateCalculationsRouter);
 app.use('/api/savedDesigns', savedDesignsRouter);
 app.use('/api/dashboard', dashboardRouter);
 
-// Health check endpoint
+
+// ✅ Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running' });
 });
 
-// 404 handler
+
+// ✅ 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Error handler (must be last)
+
+// ✅ Error handler
 app.use(errorHandler);
+
 
 const PORT = process.env.PORT || 3001;
 
+
+// ✅ Start server
 server.listen(PORT, () => {
-  console.log(`Server running on https://waqas-emb-backend.onrender.com/`);
-  console.log(`WebSocket server running on ws://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// Handle graceful shutdown
+
+// ✅ Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM signal received: closing HTTP server');
   server.close(() => {
