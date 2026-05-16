@@ -222,7 +222,9 @@ router.get('/', async (req, res) => {
     } else {
       filter = getScopedFilter(req);
     }
-    const lots = await GhausiaLot.find(filter).sort({ receivedDate: -1 });
+    const lots = await GhausiaLot.find(filter)
+      .sort({ receivedDate: -1 })
+      .populate('businessOwnerId', 'name');
     res.json(lots);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching lots', error: error.message });
@@ -352,7 +354,7 @@ router.get('/:id', async (req, res) => {
     const filter = isParty(req.user)
       ? getPartyAccessibleLotFilter(req.user, { _id: req.params.id })
       : getScopedFilter(req, { _id: req.params.id });
-    const lot = await GhausiaLot.findOne(filter);
+    const lot = await GhausiaLot.findOne(filter).populate('businessOwnerId', 'name');
     if (!lot) {
       return res.status(404).json({ message: 'Lot not found' });
     }

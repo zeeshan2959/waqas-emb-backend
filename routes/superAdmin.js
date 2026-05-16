@@ -3,20 +3,24 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-router.get('/pending-admins', async (req, res) => {
+/** All org admins (every status) — audit log; approved rows are not removed. */
+async function listAllOrganizationAdmins(req, res) {
   try {
-    const admins = await User.find({
-      role: 'admin',
-      status: 'pending',
-    })
+    const admins = await User.find({ role: 'admin' })
       .sort({ createdAt: -1 })
+      .select('-password -passwordResetToken -passwordResetExpires')
+      .populate('approvedBy', 'name email')
       .lean();
 
     res.json(admins);
   } catch (error) {
-    res.status(500).json({ message: 'Error loading pending administrators', error: error.message });
+    res.status(500).json({ message: 'Error loading organization administrators', error: error.message });
   }
-});
+}
+
+router.get('/organization-admins', listAllOrganizationAdmins);
+/** @deprecated Use /organization-admins; kept for older clients — same payload. */
+router.get('/pending-admins', listAllOrganizationAdmins);
 
 router.patch('/admins/:id/approve', async (req, res) => {
   try {
